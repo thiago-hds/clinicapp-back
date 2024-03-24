@@ -1,26 +1,34 @@
+import { IClientsService } from '@services/clients/IClientsService';
+import { ClientePostRequestDto } from '@services/clients/dto/ClientPostRequestDto';
 import * as express from 'express';
+import { inject } from 'inversify';
 import {
 	interfaces,
 	controller,
 	httpGet,
 	httpPost,
-	httpDelete,
 	request,
-	queryParam,
 	response,
-	requestParam,
+	requestBody,
 } from 'inversify-express-utils';
-import { injectable, inject } from 'inversify';
 
 @controller('/clients')
 export class ClientsController implements interfaces.Controller {
-	// constructor(@inject('FooService') private fooService: FooService) {}
+	constructor(
+		@inject('IClientsService')
+		private readonly clientsService: IClientsService
+	) {}
 
 	@httpGet('/')
-	private index(
-		@request() req: express.Request,
-		@response() res: express.Response
-	): object {
+	private index(@request() req: Request, @response() res: Response): object {
 		return { ok: true };
+	}
+
+	@httpPost('/')
+	private async save(
+		@requestBody() body: ClientePostRequestDto
+	): Promise<object> {
+		console.log('body', body);
+		return this.clientsService.save(body);
 	}
 }
