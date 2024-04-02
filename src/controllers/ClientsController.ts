@@ -1,6 +1,7 @@
 import { IClientsService } from '@services/clients/IClientsService';
-import { ClientePostRequestDto } from '@services/clients/dto/ClientPostRequestDto';
-import * as express from 'express';
+import { CreateClientDto } from '@util/dtos/clients/CreateClientDto';
+import { ListClientDto } from '@util/dtos/clients/ListClientDto';
+import { Request, Response } from 'express';
 import { inject } from 'inversify';
 import {
 	interfaces,
@@ -10,25 +11,34 @@ import {
 	request,
 	response,
 	requestBody,
+	requestParam,
+	queryParam,
 } from 'inversify-express-utils';
+import { TYPES } from 'src/ioc_types';
+import { validateRequestDtoMiddleware } from 'src/middlewares/validate-request.middleware';
 
 @controller('/clients')
 export class ClientsController implements interfaces.Controller {
 	constructor(
-		@inject('IClientsService')
+		@inject(TYPES.IClientsService)
 		private readonly clientsService: IClientsService
 	) {}
 
 	@httpGet('/')
-	private index(@request() req: Request, @response() res: Response): object {
-		return { ok: true };
+	private async index(
+		@queryParam() params: ListClientDto,
+		@response() res: Response
+	): Promise<void> {
+		const response = await this.clientsService.list(params);
+		res.status(response.statusCode).json(response);
 	}
 
-	@httpPost('/')
+	@httpPost('/', validateRequestDtoMiddleware(CreateClientDto, 'client'))
 	private async save(
-		@requestBody() body: ClientePostRequestDto
-	): Promise<object> {
-		console.log('body', body);
-		return this.clientsService.save(body);
+		@response() res: Response,
+		@requestBody() body: CreateClientDto
+	): Promise<void> {
+		const response = await this.clientsService.save(body);
+		res.status(response.statusCode).json(response);
 	}
 }

@@ -1,5 +1,8 @@
-import { CreateClientDto } from './dto/CreateClientDto';
+import { HttpResponse } from 'src/web/interfaces/HttpResponse';
+import { ListClientDto } from '@util/dtos/clients/ListClientDto';
+import { CreateClientDto } from '@util/dtos/clients/CreateClientDto';
 
 export interface IClientsService {
-	save(payload: CreateClientDto): any;
+	list(filters: ListClientDto): Promise<HttpResponse>;
+	save(payload: CreateClientDto): Promise<HttpResponse>;
 }

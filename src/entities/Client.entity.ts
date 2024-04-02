@@ -2,9 +2,15 @@ import {
 	BeforeInsert,
 	BeforeUpdate,
 	Column,
+	CreateDateColumn,
+	DeleteDateColumn,
 	Entity,
+	JoinColumn,
+	OneToOne,
 	PrimaryGeneratedColumn,
+	UpdateDateColumn,
 } from 'typeorm';
+import { Address } from './Address.entity';
 
 @Entity({ name: 'clients' })
 export class Client {
@@ -21,10 +27,10 @@ export class Client {
 	rg: string;
 
 	@Column({ type: 'date', name: 'date_of_birth', nullable: true })
-	dateOfBirth: Date;
+	dateOfBirth: Date | null;
 
 	@Column({ type: 'date', name: 'date_of_first_visit', nullable: true })
-	dateOfFirstVisit: Date;
+	dateOfFirstVisit: Date | null;
 
 	@Column({ type: 'text', nullable: true })
 	notes: string;
@@ -35,9 +41,32 @@ export class Client {
 	@Column({ type: 'varchar', length: 255, nullable: true })
 	email: string;
 
-	@BeforeInsert()
-	@BeforeUpdate()
-	async validate() {
-		// await validateOrReject(this);
-	}
+	@Column({
+		name: 'landline_phone',
+		type: 'varchar',
+		length: 255,
+		nullable: true,
+	})
+	landlinePhone: string;
+
+	@Column({
+		name: 'mobile_phone',
+		type: 'varchar',
+		length: 255,
+		nullable: true,
+	})
+	mobilePhone: string;
+
+	@OneToOne(() => Address)
+	@JoinColumn({ name: 'address_id' })
+	address: Address;
+
+	@CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+	createdAt: Date;
+
+	@UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+	updatedAt: Date;
+
+	@DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz' })
+	deletedAt: Date;
 }
