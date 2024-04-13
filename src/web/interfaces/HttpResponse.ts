@@ -4,7 +4,7 @@ export type FieldValidationError = {
 	messages: string[];
 };
 
-export interface HttpResponse {
+export class HttpResponseDto {
 	statusCode: number;
 	success: boolean;
 	data?: any;

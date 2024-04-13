@@ -30,8 +30,10 @@ export class ClientsRepository implements IClientsRepository {
 		const itemCount = await queryBuilder.getCount();
 		const { entities } = await queryBuilder.getRawAndEntities();
 
+		const dtos = entities.map(item => ClientDto.fromEntity(item));
+
 		const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
-		return new PageDto(entities, pageMetaDto);
+		return new PageDto(dtos, pageMetaDto);
 	}
 
 	async save(client: Client) {
@@ -48,6 +50,16 @@ export class ClientsRepository implements IClientsRepository {
 		try {
 			const repo = await this.database.getRepository(Client);
 			return await repo.findOne({ where: { cpf } });
+		} catch (error: any) {
+			// TODO criar classes de exceções customizadas
+			throw error;
+		}
+	}
+
+	async findOneById(id: number): Promise<Client> {
+		try {
+			const repo = await this.database.getRepository(Client);
+			return await repo.findOneBy({ id });
 		} catch (error: any) {
 			// TODO criar classes de exceções customizadas
 			throw error;

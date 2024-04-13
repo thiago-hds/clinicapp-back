@@ -8,6 +8,7 @@ import { HttpResponse } from 'src/web/interfaces/HttpResponse';
 import { CreateClientDto } from '@util/dtos/clients/CreateClientDto';
 import { PageOptionsDto } from '@util/dtos/pagination/PageOptionsDto';
 import { ListClientDto } from '@util/dtos/clients/ListClientDto';
+import { ClientDto } from '@util/dtos/clients/ClientDto';
 
 @injectable()
 export class ClientsService implements IClientsService {
@@ -25,7 +26,24 @@ export class ClientsService implements IClientsService {
 		return {
 			statusCode: 200,
 			success: true,
-			data: clients,
+			...clients,
+		};
+	}
+
+	async get(id: number): Promise<HttpResponse> {
+		const client = await this.clientsRepository.findOneById(id);
+
+		if (!client) {
+			return {
+				statusCode: 404,
+				success: false,
+				message: 'Not found',
+			};
+		}
+		return {
+			statusCode: 200,
+			success: true,
+			data: ClientDto.fromEntity(client),
 		};
 	}
 
@@ -37,7 +55,7 @@ export class ClientsService implements IClientsService {
 			return {
 				statusCode: 400,
 				success: false,
-				message: 'clients.save.error.alreadyExists',
+				message: 'clients.save.error.CpfAlreadyExists',
 			};
 		}
 

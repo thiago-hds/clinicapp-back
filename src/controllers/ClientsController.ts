@@ -24,6 +24,15 @@ export class ClientsController implements interfaces.Controller {
 		private readonly clientsService: IClientsService
 	) {}
 
+	@httpGet('/:id')
+	private async get(
+		@requestParam('id') id: number,
+		@response() res: Response
+	): Promise<void> {
+		const response = await this.clientsService.get(id);
+		res.status(response.statusCode).json(response);
+	}
+
 	@httpGet('/')
 	private async index(
 		@queryParam() params: ListClientDto,

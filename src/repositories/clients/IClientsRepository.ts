@@ -7,4 +7,5 @@ export interface IClientsRepository {
 	findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<ClientDto>>;
 	save(client: Client): Promise<Client>;
 	findOneByCpf(cpf: string): Promise<Client>;
+	findOneById(id: number): Promise<Client>;
 }
