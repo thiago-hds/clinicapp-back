@@ -2,13 +2,18 @@ import {
 	IsDateString,
 	IsEmail,
 	IsNotEmpty,
+	IsNumber,
+	IsNumberString,
 	IsOptional,
 	MaxLength,
 } from 'class-validator';
 
-export class CreateClientDto {
+export class ClientRequestDto {
 	@IsNotEmpty()
-	name: string;
+	firstName: string;
+
+	@IsNotEmpty()
+	lastName: string;
 
 	@IsNotEmpty()
 	cpf: string;
@@ -40,6 +45,10 @@ export class CreateClientDto {
 
 	@IsOptional()
 	@MaxLength(255)
+	howTheyFoundUs: string;
+
+	@IsOptional()
+	@MaxLength(255)
 	landlinePhone: string;
 
 	@IsOptional()
@@ -53,6 +62,10 @@ export class CreateClientDto {
 	streetName: string;
 
 	@MaxLength(255)
+	@IsNumberString({ no_symbols: true })
+	addressNumber: string;
+
+	@MaxLength(255)
 	district: string;
 
 	@MaxLength(255)
@@ -60,4 +73,8 @@ export class CreateClientDto {
 
 	@MaxLength(255)
 	state: string;
+
+	@IsOptional()
+	@MaxLength(255)
+	addressAdditionalDetails: string;
 }

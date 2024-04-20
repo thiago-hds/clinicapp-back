@@ -14,9 +14,9 @@ export class DatabaseService {
 
 		try {
 			DatabaseService.dataSource = await appDataSource.initialize();
-			// this.logger.info('Connection Established!');
+			console.info('Database Connection Established!');
 		} catch (error) {
-			// this.logger.error(`Connection Failed. Error: ${error}`);
+			console.error(`Database Connection Failed. Error: ${error}`);
 		}
 
 		return DatabaseService.dataSource;

@@ -7,6 +7,8 @@ import { ClientDto } from '@util/dtos/clients/ClientDto';
 import { PageOptionsDto } from '@util/dtos/pagination/PageOptionsDto';
 import { PageDto } from '@util/dtos/pagination/PageDto';
 import { PageMetaDto } from '@util/dtos/pagination/PageMetaDto';
+import { ItemPage } from '@util/pagination/ItemPage';
+import { EntityPage } from '@util/pagination/EntityPage';
 
 @injectable()
 export class ClientsRepository implements IClientsRepository {
@@ -17,23 +19,19 @@ export class ClientsRepository implements IClientsRepository {
 
 	async findMany(
 		pageOptionsDto: PageOptionsDto
-	): Promise<PageDto<ClientDto>> {
-		const queryBuilder = (
-			await this.database.getRepository(Client)
-		).createQueryBuilder('clients');
+	): Promise<EntityPage<Client>> {
+		const repo = await this.database.getRepository(Client);
+		const queryBuilder = repo.createQueryBuilder('clients');
 
 		queryBuilder
 			.orderBy('clients.created_at', pageOptionsDto.order)
 			.skip(pageOptionsDto.skip)
 			.take(pageOptionsDto.take);
 
-		const itemCount = await queryBuilder.getCount();
+		const count = await queryBuilder.getCount();
 		const { entities } = await queryBuilder.getRawAndEntities();
 
-		const dtos = entities.map(item => ClientDto.fromEntity(item));
-
-		const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
-		return new PageDto(dtos, pageMetaDto);
+		return new EntityPage(entities, count);
 	}
 
 	async save(client: Client) {
@@ -59,7 +57,12 @@ export class ClientsRepository implements IClientsRepository {
 	async findOneById(id: number): Promise<Client> {
 		try {
 			const repo = await this.database.getRepository(Client);
-			return await repo.findOneBy({ id });
+			return await repo.findOne({
+				where: { id },
+				relations: {
+					address: true,
+				},
+			});
 		} catch (error: any) {
 			// TODO criar classes de exceções customizadas
 			throw error;

@@ -1,5 +1,5 @@
 import { IClientsService } from '@services/clients/IClientsService';
-import { CreateClientDto } from '@util/dtos/clients/CreateClientDto';
+import { ClientRequestDto } from '@util/dtos/clients/ClientRequestDto';
 import { ListClientDto } from '@util/dtos/clients/ListClientDto';
 import { Request, Response } from 'express';
 import { inject } from 'inversify';
@@ -13,6 +13,7 @@ import {
 	requestBody,
 	requestParam,
 	queryParam,
+	httpPut,
 } from 'inversify-express-utils';
 import { TYPES } from 'src/ioc_types';
 import { validateRequestDtoMiddleware } from 'src/middlewares/validate-request.middleware';
@@ -34,7 +35,7 @@ export class ClientsController implements interfaces.Controller {
 	}
 
 	@httpGet('/')
-	private async index(
+	private async list(
 		@queryParam() params: ListClientDto,
 		@response() res: Response
 	): Promise<void> {
@@ -42,12 +43,22 @@ export class ClientsController implements interfaces.Controller {
 		res.status(response.statusCode).json(response);
 	}
 
-	@httpPost('/', validateRequestDtoMiddleware(CreateClientDto, 'client'))
-	private async save(
+	@httpPost('/', validateRequestDtoMiddleware(ClientRequestDto, 'client'))
+	private async create(
 		@response() res: Response,
-		@requestBody() body: CreateClientDto
+		@requestBody() body: ClientRequestDto
 	): Promise<void> {
-		const response = await this.clientsService.save(body);
+		const response = await this.clientsService.create(body);
+		res.status(response.statusCode).json(response);
+	}
+
+	@httpPut('/:id', validateRequestDtoMiddleware(ClientRequestDto, 'client'))
+	private async update(
+		@requestParam('id') id: number,
+		@requestBody() body: ClientRequestDto,
+		@response() res: Response
+	): Promise<void> {
+		const response = await this.clientsService.update(id, body);
 		res.status(response.statusCode).json(response);
 	}
 }

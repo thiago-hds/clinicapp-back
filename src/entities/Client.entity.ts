@@ -17,8 +17,11 @@ export class Client {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column({ type: 'varchar', length: 255 })
-	name: string;
+	@Column({ name: 'first_name', type: 'varchar', length: 255 })
+	firstName: string;
+
+	@Column({ name: 'last_name', type: 'varchar', length: 255 })
+	lastName: string;
 
 	@Column({ type: 'varchar', length: 255, nullable: true })
 	cpf: string;
@@ -60,6 +63,14 @@ export class Client {
 	@OneToOne(() => Address)
 	@JoinColumn({ name: 'address_id' })
 	address: Address;
+
+	@Column({
+		name: 'how_they_found_us',
+		type: 'varchar',
+		length: 255,
+		nullable: true,
+	})
+	howTheyFoundUs: string;
 
 	@CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
 	createdAt: Date;

@@ -1,9 +1,10 @@
-import { HttpResponse } from 'src/web/interfaces/HttpResponse';
+import { HttpResponseDto } from 'src/web/interfaces/HttpResponse';
 import { ListClientDto } from '@util/dtos/clients/ListClientDto';
-import { CreateClientDto } from '@util/dtos/clients/CreateClientDto';
+import { ClientRequestDto } from '@util/dtos/clients/ClientRequestDto';
 
 export interface IClientsService {
-	list(filters: ListClientDto): Promise<HttpResponse>;
-	get(id: number): Promise<HttpResponse>;
-	save(payload: CreateClientDto): Promise<HttpResponse>;
+	list(filters: ListClientDto): Promise<HttpResponseDto>;
+	get(id: number): Promise<HttpResponseDto>;
+	create(payload: ClientRequestDto): Promise<HttpResponseDto>;
+	update(id: number, payload: ClientRequestDto): Promise<HttpResponseDto>;
 }
