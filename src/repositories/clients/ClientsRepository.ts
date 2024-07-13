@@ -2,13 +2,13 @@ import { Client } from '@entities/Client.entity';
 import { IDatabaseService } from '@services/database/IDatabaseService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from 'src/ioc_types';
-import { IClientsRepository } from './IClientsRepository';
-import { ClientDto } from '@util/dtos/clients/ClientDto';
-import { PageOptionsDto } from '@util/dtos/pagination/PageOptionsDto';
-import { PageDto } from '@util/dtos/pagination/PageDto';
-import { PageMetaDto } from '@util/dtos/pagination/PageMetaDto';
-import { ItemPage } from '@util/pagination/ItemPage';
+import {
+	IClientsRepository,
+	ListClientParams,
+	PaginationParams,
+} from './IClientsRepository';
 import { EntityPage } from '@util/pagination/EntityPage';
+import { Brackets } from 'typeorm';
 
 @injectable()
 export class ClientsRepository implements IClientsRepository {
@@ -18,18 +18,34 @@ export class ClientsRepository implements IClientsRepository {
 	) {}
 
 	async findMany(
-		pageOptionsDto: PageOptionsDto
+		params: ListClientParams,
+		paginationParams?: PaginationParams
 	): Promise<EntityPage<Client>> {
 		const repo = await this.database.getRepository(Client);
 		const queryBuilder = repo.createQueryBuilder('clients');
 
-		queryBuilder
-			.orderBy('clients.created_at', pageOptionsDto.order)
-			.skip(pageOptionsDto.skip)
-			.take(pageOptionsDto.take);
+		if (params.query) {
+			queryBuilder.andWhere(
+				new Brackets(qb => {
+					qb.where('clients.first_name ILIKE :query').orWhere(
+						'clients.last_name ILIKE :query'
+					);
+				}),
+				{ query: `%${params.query}%` }
+			);
+		}
 
-		const count = await queryBuilder.getCount();
-		const { entities } = await queryBuilder.getRawAndEntities();
+		if (paginationParams) {
+			queryBuilder
+				.orderBy(
+					params.orderBy ? `clients.${params.orderBy}` : 'clients.id',
+					paginationParams.order
+				)
+				.skip(paginationParams.skip)
+				.take(paginationParams.take);
+		}
+
+		const [entities, count] = await queryBuilder.getManyAndCount();
 
 		return new EntityPage(entities, count);
 	}
@@ -67,5 +83,12 @@ export class ClientsRepository implements IClientsRepository {
 			// TODO criar classes de exceções customizadas
 			throw error;
 		}
+	}
+
+	async delete(id: number): Promise<void> {
+		const repo = await this.database.getRepository(Client);
+		await repo.softDelete({
+			id,
+		});
 	}
 }

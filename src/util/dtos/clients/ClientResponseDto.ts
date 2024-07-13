@@ -5,16 +5,16 @@ export class ClientResponseDto {
 	id: number | null = null;
 	firstName: string = '';
 	lastName: string = '';
-	cpf: string = '';
+	cpf: string | null = '';
 	rg: string = '';
 	dateOfBirth: Date | null = null;
 	dateOfFirstVisit: Date | null = null;
-	notes: string = '';
-	occupation: string = '';
-	email: string = '';
-	landlinePhone: string = '';
-	mobilePhone: string = '';
-	howTheyFoundUs: string = '';
+	notes: string | null = '';
+	occupation: string | null = '';
+	email: string | null = '';
+	landlinePhone: string | null = '';
+	mobilePhone: string | null = '';
+	howTheyFoundUs: string | null = '';
 	address: AddressDto | null = null;
 
 	public static fromEntity(client: Client): ClientResponseDto {

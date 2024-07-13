@@ -6,10 +6,10 @@ import { Client, Address } from '@entities/index';
 import { removeNonNumberCharacters } from '@util/formatter';
 import { HttpResponseDto } from 'src/web/interfaces/HttpResponse';
 import { ClientRequestDto } from '@util/dtos/clients/ClientRequestDto';
-import { ListClientDto } from '@util/dtos/clients/ListClientDto';
 import { ClientResponseDto } from '@util/dtos/clients/ClientResponseDto';
 import { PageMetaDto } from '@util/dtos/pagination/PageMetaDto';
 import { PageDto } from '@util/dtos/pagination/PageDto';
+import { ListClientRequestDto } from '@util/dtos/clients/ListClientRequestDto';
 
 @injectable()
 export class ClientsService implements IClientsService {
@@ -20,9 +20,16 @@ export class ClientsService implements IClientsService {
 		private readonly addressesRepository: IAddressesRepository
 	) {}
 
-	async list(listClientDto: ListClientDto): Promise<HttpResponseDto> {
+	async list(listClientDto: ListClientRequestDto): Promise<HttpResponseDto> {
 		console.log(listClientDto);
-		const clientPage = await this.clientsRepository.findMany(listClientDto);
+		const clientPage = await this.clientsRepository.findMany(
+			{ query: listClientDto.query, orderBy: listClientDto.orderBy },
+			{
+				take: listClientDto.take,
+				skip: listClientDto.skip,
+				order: listClientDto.order,
+			}
+		);
 
 		const dtos = clientPage.items.map(item =>
 			ClientResponseDto.fromEntity(item)
@@ -43,7 +50,6 @@ export class ClientsService implements IClientsService {
 
 	async get(id: number): Promise<HttpResponseDto> {
 		const client = await this.clientsRepository.findOneById(id);
-
 		if (!client) {
 			return {
 				statusCode: 404,
@@ -51,10 +57,30 @@ export class ClientsService implements IClientsService {
 				message: 'Not found',
 			};
 		}
+
 		return {
 			statusCode: 200,
 			success: true,
 			data: ClientResponseDto.fromEntity(client),
+		};
+	}
+
+	async delete(id: number): Promise<HttpResponseDto> {
+		const client = await this.clientsRepository.findOneById(id);
+		if (!client) {
+			return {
+				statusCode: 404,
+				success: false,
+				message: 'Not found',
+			};
+		}
+
+		this.clientsRepository.delete(id);
+
+		return {
+			statusCode: 200,
+			success: true,
+			message: 'clients.delete.success',
 		};
 	}
 
@@ -100,7 +126,7 @@ export class ClientsService implements IClientsService {
 			return {
 				statusCode: 400,
 				success: false,
-				message: 'clients.save.error.CpfAlreadyExists',
+				message: 'clients.update.error.cpfAlreadyExists',
 			};
 		}
 
@@ -126,11 +152,12 @@ export class ClientsService implements IClientsService {
 		address.additionalDetails = payload.addressAdditionalDetails;
 		await this.addressesRepository.save(address);
 
-		client.firstName = payload.firstName.toUpperCase();
-		client.lastName = payload.lastName.toUpperCase();
+		client.firstName = payload.firstName;
+		client.lastName = payload.lastName;
 		client.cpf = removeNonNumberCharacters(payload.cpf);
 		client.rg = payload.rg;
-		client.occupation = payload.occupation.toUpperCase();
+		client.occupation = payload.occupation;
+
 		client.howTheyFoundUs = payload.howTheyFoundUs;
 
 		client.dateOfBirth = payload.dateOfBirth

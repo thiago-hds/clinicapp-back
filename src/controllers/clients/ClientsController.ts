@@ -1,24 +1,24 @@
-import { IClientsService } from '@services/clients/IClientsService';
-import { ClientRequestDto } from '@util/dtos/clients/ClientRequestDto';
-import { ListClientDto } from '@util/dtos/clients/ListClientDto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { inject } from 'inversify';
 import {
 	interfaces,
 	controller,
 	httpGet,
 	httpPost,
-	request,
 	response,
 	requestBody,
 	requestParam,
 	queryParam,
 	httpPut,
+	httpDelete,
 } from 'inversify-express-utils';
 import { TYPES } from 'src/ioc_types';
 import { validateRequestDtoMiddleware } from 'src/middlewares/validate-request.middleware';
+import { IClientsService } from '@services/clients/IClientsService';
+import { ClientRequestDto } from '@util/dtos/clients/ClientRequestDto';
+import { ListClientRequestDto } from '@util/dtos/clients/ListClientRequestDto';
 
-@controller('/clients')
+@controller('/clients', TYPES.JwtVerifierMiddleware)
 export class ClientsController implements interfaces.Controller {
 	constructor(
 		@inject(TYPES.IClientsService)
@@ -36,7 +36,7 @@ export class ClientsController implements interfaces.Controller {
 
 	@httpGet('/')
 	private async list(
-		@queryParam() params: ListClientDto,
+		@queryParam() params: ListClientRequestDto,
 		@response() res: Response
 	): Promise<void> {
 		const response = await this.clientsService.list(params);
@@ -59,6 +59,15 @@ export class ClientsController implements interfaces.Controller {
 		@response() res: Response
 	): Promise<void> {
 		const response = await this.clientsService.update(id, body);
+		res.status(response.statusCode).json(response);
+	}
+
+	@httpDelete('/:id')
+	private async delete(
+		@requestParam('id') id: number,
+		@response() res: Response
+	): Promise<void> {
+		const response = await this.clientsService.delete(id);
 		res.status(response.statusCode).json(response);
 	}
 }

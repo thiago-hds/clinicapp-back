@@ -24,7 +24,7 @@ export class Client {
 	lastName: string;
 
 	@Column({ type: 'varchar', length: 255, nullable: true })
-	cpf: string;
+	cpf: string | null;
 
 	@Column({ type: 'varchar', length: 255, nullable: true })
 	rg: string;
@@ -36,13 +36,13 @@ export class Client {
 	dateOfFirstVisit: Date | null;
 
 	@Column({ type: 'text', nullable: true })
-	notes: string;
+	notes: string | null;
 
 	@Column({ type: 'varchar', length: 255, nullable: true })
-	occupation: string;
+	occupation: string | null;
 
 	@Column({ type: 'varchar', length: 255, nullable: true })
-	email: string;
+	email: string | null;
 
 	@Column({
 		name: 'landline_phone',
@@ -50,7 +50,7 @@ export class Client {
 		length: 255,
 		nullable: true,
 	})
-	landlinePhone: string;
+	landlinePhone: string | null;
 
 	@Column({
 		name: 'mobile_phone',
@@ -58,7 +58,7 @@ export class Client {
 		length: 255,
 		nullable: true,
 	})
-	mobilePhone: string;
+	mobilePhone: string | null;
 
 	@OneToOne(() => Address)
 	@JoinColumn({ name: 'address_id' })
@@ -70,7 +70,7 @@ export class Client {
 		length: 255,
 		nullable: true,
 	})
-	howTheyFoundUs: string;
+	howTheyFoundUs: string | null;
 
 	@CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
 	createdAt: Date;
@@ -80,4 +80,26 @@ export class Client {
 
 	@DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz' })
 	deletedAt: Date;
+
+	@BeforeInsert()
+	beforeInsert() {
+		this.formatarCampos();
+	}
+
+	@BeforeUpdate()
+	beforeUpdate() {
+		this.formatarCampos();
+	}
+
+	private formatarCampos() {
+		if (this.firstName) {
+			this.firstName = this.firstName.toUpperCase();
+		}
+		if (this.lastName) {
+			this.lastName = this.lastName.toUpperCase();
+		}
+		if (this.occupation) {
+			this.occupation = this.occupation.toUpperCase();
+		}
+	}
 }
