@@ -2,7 +2,6 @@ import {
 	IsDateString,
 	IsEmail,
 	IsNotEmpty,
-	IsNumber,
 	IsNumberString,
 	IsOptional,
 	MaxLength,
@@ -24,7 +23,6 @@ export class ClientRequestDto {
 
 	@IsOptional()
 	@IsDateString()
-	// @MaxDate(new Date())
 	dateOfBirth: string;
 
 	@IsOptional()

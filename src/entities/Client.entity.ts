@@ -30,10 +30,10 @@ export class Client {
 	rg: string;
 
 	@Column({ type: 'date', name: 'date_of_birth', nullable: true })
-	dateOfBirth: Date | null;
+	dateOfBirth: string | null;
 
 	@Column({ type: 'date', name: 'date_of_first_visit', nullable: true })
-	dateOfFirstVisit: Date | null;
+	dateOfFirstVisit: string | null;
 
 	@Column({ type: 'text', nullable: true })
 	notes: string | null;

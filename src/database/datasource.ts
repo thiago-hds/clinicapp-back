@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 dotenv.config();
 
@@ -16,4 +17,4 @@ const appDataSource = new DataSource({
 	migrationsTableName: 'clinicapp_migrations',
 });
 
-export default appDataSource;
+export default addTransactionalDataSource(appDataSource);

@@ -3,6 +3,10 @@ import dotenv from 'dotenv';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import express from 'express';
 import bodyParser from 'body-parser';
+import {
+	initializeTransactionalContext,
+	StorageDriver,
+} from 'typeorm-transactional';
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
@@ -20,6 +24,10 @@ export class App {
 
 	async setup() {
 		dotenv.config();
+
+		initializeTransactionalContext({
+			storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE,
+		});
 
 		const port = process.env.PORT ?? 8000;
 		const server = new InversifyExpressServer(container);

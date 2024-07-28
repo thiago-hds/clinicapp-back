@@ -10,6 +10,7 @@ import { ClientResponseDto } from '@util/dtos/clients/ClientResponseDto';
 import { PageMetaDto } from '@util/dtos/pagination/PageMetaDto';
 import { PageDto } from '@util/dtos/pagination/PageDto';
 import { ListClientRequestDto } from '@util/dtos/clients/ListClientRequestDto';
+import { Transactional } from 'typeorm-transactional';
 
 @injectable()
 export class ClientsService implements IClientsService {
@@ -139,9 +140,8 @@ export class ClientsService implements IClientsService {
 		};
 	}
 
+	@Transactional()
 	private async saveClient(client: Client, payload: ClientRequestDto) {
-		// TODO adicionar transaction
-
 		const address = client.address ?? new Address();
 		address.zipcode = removeNonNumberCharacters(payload.zipcode);
 		address.streetName = payload.streetName;
@@ -157,23 +157,15 @@ export class ClientsService implements IClientsService {
 		client.cpf = removeNonNumberCharacters(payload.cpf);
 		client.rg = payload.rg;
 		client.occupation = payload.occupation;
-
 		client.howTheyFoundUs = payload.howTheyFoundUs;
-
-		client.dateOfBirth = payload.dateOfBirth
-			? new Date(payload.dateOfBirth)
-			: null;
-
-		client.dateOfFirstVisit = payload.dateOfFirstVisit
-			? new Date(payload.dateOfFirstVisit)
-			: null;
-
+		client.dateOfBirth = payload.dateOfBirth;
+		client.dateOfFirstVisit = payload.dateOfFirstVisit;
 		client.notes = payload.notes;
 		client.email = payload.email;
 		client.landlinePhone = payload.landlinePhone;
 		client.mobilePhone = payload.mobilePhone;
 		client.address = address;
-		console.log(client);
+
 		return await this.clientsRepository.save(client);
 	}
 }
