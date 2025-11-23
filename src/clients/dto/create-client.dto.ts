@@ -1,11 +1,15 @@
+import { Type } from "class-transformer";
 import {
   IsDateString,
   IsEmail,
   IsNotEmpty,
-  IsNumberString,
   IsOptional,
   MaxLength,
-} from 'class-validator';
+  Validate,
+  ValidateNested,
+} from "class-validator";
+import { CreateAddressDto } from "src/addresses/dto/create-address.dto";
+import { IsCpfValidator } from "src/common/validators/is-cpf.validator";
 
 export class CreateClientDto {
   @IsNotEmpty()
@@ -15,6 +19,7 @@ export class CreateClientDto {
   lastName: string;
 
   @IsNotEmpty()
+  @Validate(IsCpfValidator)
   cpf: string;
 
   @IsOptional()
@@ -53,26 +58,7 @@ export class CreateClientDto {
   @MaxLength(255)
   mobilePhone: string;
 
-  @MaxLength(255)
-  zipcode: string;
-
-  @MaxLength(255)
-  streetName: string;
-
-  @MaxLength(255)
-  @IsNumberString({ no_symbols: true })
-  addressNumber: string;
-
-  @MaxLength(255)
-  district: string;
-
-  @MaxLength(255)
-  city: string;
-
-  @MaxLength(255)
-  state: string;
-
-  @IsOptional()
-  @MaxLength(255)
-  addressAdditionalDetails: string;
+  @ValidateNested()
+  @Type(() => CreateAddressDto)
+  address: CreateAddressDto;
 }

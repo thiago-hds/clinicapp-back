@@ -8,13 +8,13 @@ import {
   Delete,
   ParseIntPipe,
   Query,
-} from '@nestjs/common';
-import { ClientsService } from './clients.service';
-import { CreateClientDto } from './dto/create-client.dto';
-import { UpdateClientDto } from './dto/update-client.dto';
-import { FindClientDto } from './dto/find-client.dto';
+} from "@nestjs/common";
+import { ClientsService } from "./clients.service";
+import { CreateClientDto } from "./dto/create-client.dto";
+import { UpdateClientDto } from "./dto/update-client.dto";
+import { FindClientDto } from "./dto/find-client.dto";
 
-@Controller('clients')
+@Controller("clients")
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
@@ -25,22 +25,24 @@ export class ClientsController {
 
   @Get()
   findAll(@Query() query: FindClientDto) {
-    console.log('params', JSON.stringify(query));
     return this.clientsService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  @Get(":id")
+  findOne(@Param("id", ParseIntPipe) id: number) {
     return this.clientsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
+  @Patch(":id")
+  update(
+    @Param("id", ParseIntPipe) id: string,
+    @Body() updateClientDto: UpdateClientDto,
+  ) {
     return this.clientsService.update(+id, updateClientDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(":id")
+  remove(@Param("id", ParseIntPipe) id: string) {
     return this.clientsService.remove(+id);
   }
 }
