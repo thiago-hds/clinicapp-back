@@ -39,6 +39,9 @@ export class ClientsService {
     const [items, total] = await this.clientsRepository.findAndCount({
       skip,
       take: limit,
+      order: {
+        id: "DESC",
+      },
     });
 
     return new PaginatedResponseDto(items, total, page, limit);
@@ -58,11 +61,32 @@ export class ClientsService {
     return client;
   }
 
-  update(id: number, updateClientDto: UpdateClientDto) {
-    return `This action updates a #${id} client`;
+  async update(id: number, updateClientDto: UpdateClientDto) {
+    const client = await this.clientsRepository.findOneBy({ id });
+    if (!client) {
+      throw new HttpException("Not found", HttpStatus.NOT_FOUND);
+    }
+
+    const clientWithDocument = await this.clientsRepository.findOneBy({ cpf: updateClientDto.cpf });
+    if (clientWithDocument && clientWithDocument.id !== client.id) {
+      return new HttpException("CPF already exists", HttpStatus.BAD_REQUEST);
+    }
+
+    const updatedClient = this.clientsRepository.merge(client, updateClientDto);
+    return await this.clientsRepository.save(updatedClient);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} client`;
+  async remove(id: number) {
+    const client = await this.clientsRepository.findOneBy({ id });
+    if (!client) {
+      throw new HttpException("Not found", HttpStatus.NOT_FOUND);
+    }
+
+    await this.clientsRepository.delete({ id });
+
+    return {
+      message: "Client removed successfully",
+      id,
+    };
   }
 }

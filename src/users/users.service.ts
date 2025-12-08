@@ -9,7 +9,7 @@ import { Repository } from "typeorm";
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   create(createUserDto: CreateUserDto) {
@@ -30,5 +30,11 @@ export class UsersService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async findByEmail(email: string) {
+    return this.usersRepository.findOne({
+      where: { email },
+    });
   }
 }

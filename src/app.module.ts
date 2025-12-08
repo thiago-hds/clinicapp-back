@@ -7,6 +7,7 @@ import { ClientsModule } from "./clients/clients.module";
 import { AddressesModule } from "./addresses/addresses.module";
 import { ConfigModule } from "@nestjs/config";
 import { CommonModule } from "./common/common.module";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CommonModule } from "./common/common.module";
     ClientsModule,
     AddressesModule,
     CommonModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
