@@ -1,15 +1,25 @@
 export class PaginatedResponseDto<T> {
   items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
 
   constructor(items: T[], total: number, page: number, limit: number) {
+    const totalPages = Math.ceil(total / limit);
+
     this.items = items;
-    this.total = total;
-    this.page = page;
-    this.limit = limit;
-    this.totalPages = Math.ceil(total / limit);
+    this.pagination = {
+      total,
+      page,
+      limit,
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
+    };
   }
 }

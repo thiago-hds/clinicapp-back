@@ -8,6 +8,7 @@ import { FindClientDto } from "./dto/find-client.dto";
 import { PaginatedResponseDto } from "src/common/dto/paginated-response";
 import { Address } from "src/addresses/entities/address.entity";
 import type { ClientsRepository } from "./clients.repository";
+import { ALLOWED_CLIENT_ORDER_FIELDS, ClientOrderField } from "./constants";
 
 @Injectable()
 export class ClientsService {
@@ -21,7 +22,7 @@ export class ClientsService {
   async create(createClientDto: CreateClientDto) {
     const documentExists = await this.clientsRepository.existsByCpf(createClientDto.cpf);
     if (documentExists) {
-      return new HttpException("CPF already exists", HttpStatus.BAD_REQUEST);
+      throw new HttpException("CPF already exists", HttpStatus.BAD_REQUEST);
     }
 
     const address = this.addressesRepository.create(createClientDto.address);
@@ -34,13 +35,20 @@ export class ClientsService {
   }
 
   async findAll(findClienteDto: FindClientDto) {
-    const { page, limit, skip } = findClienteDto;
+    const { page, limit, skip, order, orderBy } = findClienteDto;
+
+    const safeOrderBy: ClientOrderField = ALLOWED_CLIENT_ORDER_FIELDS.includes(
+      orderBy as ClientOrderField,
+    )
+      ? (orderBy as ClientOrderField)
+      : "createdAt";
+    const safeOrder = order ?? "desc";
 
     const [items, total] = await this.clientsRepository.findAndCount({
       skip,
       take: limit,
       order: {
-        id: "DESC",
+        [safeOrderBy]: safeOrder.toUpperCase() as "ASC" | "DESC",
       },
     });
 
@@ -62,17 +70,30 @@ export class ClientsService {
   }
 
   async update(id: number, updateClientDto: UpdateClientDto) {
-    const client = await this.clientsRepository.findOneBy({ id });
+    const client = await this.clientsRepository.findOne({
+      where: { id },
+      relations: {
+        address: true,
+      },
+    });
+
     if (!client) {
       throw new HttpException("Not found", HttpStatus.NOT_FOUND);
     }
 
     const clientWithDocument = await this.clientsRepository.findOneBy({ cpf: updateClientDto.cpf });
     if (clientWithDocument && clientWithDocument.id !== client.id) {
-      return new HttpException("CPF already exists", HttpStatus.BAD_REQUEST);
+      throw new HttpException("CPF already exists", HttpStatus.BAD_REQUEST);
     }
 
     const updatedClient = this.clientsRepository.merge(client, updateClientDto);
+    console.log("address", updateClientDto.address);
+    if (updateClientDto.address) {
+      updatedClient.address = this.addressesRepository.merge(
+        client.address,
+        updateClientDto.address,
+      );
+    }
     return await this.clientsRepository.save(updatedClient);
   }
 

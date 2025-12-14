@@ -1,5 +1,4 @@
 import { Exclude } from "class-transformer";
-import { Address } from "../../addresses/entities/address.entity";
 
 import {
   BeforeInsert,
@@ -9,11 +8,14 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from "typeorm";
+import { Address } from "../../addresses/entities/address.entity";
+import { User } from "src/users/entities/user.entity";
 
 @Entity({ name: "clients" })
 @Unique(["cpf"])
@@ -87,6 +89,14 @@ export class Client {
   @DeleteDateColumn({ name: "deleted_at", type: "timestamptz" })
   @Exclude()
   deletedAt: Date;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "created_by" })
+  createdBy: User;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "deleted_by" })
+  deletedBy: User | null;
 
   @BeforeInsert()
   beforeInsert() {
