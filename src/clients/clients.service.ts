@@ -3,7 +3,7 @@ import { CreateClientDto } from "./dto/create-client.dto";
 import { UpdateClientDto } from "./dto/update-client.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Client } from "./entities/client.entity";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, ILike, Like, Repository } from "typeorm";
 import { FindClientDto } from "./dto/find-client.dto";
 import { PaginatedResponseDto } from "src/common/dto/paginated-response";
 import { Address } from "src/addresses/entities/address.entity";
@@ -35,7 +35,7 @@ export class ClientsService {
   }
 
   async findAll(findClienteDto: FindClientDto) {
-    const { page, limit, skip, order, orderBy } = findClienteDto;
+    const { query, page, limit, skip, order, orderBy } = findClienteDto;
 
     const safeOrderBy: ClientOrderField = ALLOWED_CLIENT_ORDER_FIELDS.includes(
       orderBy as ClientOrderField,
@@ -44,7 +44,18 @@ export class ClientsService {
       : "createdAt";
     const safeOrder = order ?? "desc";
 
+    const where: FindOptionsWhere<Client>[] = [];
+
+    if (query) {
+      where.push(
+        { firstName: ILike(`%${query}%`) },
+        { lastName: ILike(`%${query}%`) },
+        { cpf: ILike(`%${query}%`) },
+      );
+    }
+
     const [items, total] = await this.clientsRepository.findAndCount({
+      where,
       skip,
       take: limit,
       order: {
