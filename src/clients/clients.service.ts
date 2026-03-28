@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { CreateClientDto } from "./dto/create-client.dto";
+import { CreateAddressDto } from "src/addresses/dto/create-address.dto";
 import { UpdateClientDto } from "./dto/update-client.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Client } from "./entities/client.entity";
-import { FindOptionsWhere, ILike, Like, Repository } from "typeorm";
+import { DeepPartial, FindOptionsWhere, ILike, Repository } from "typeorm";
 import { FindClientDto } from "./dto/find-client.dto";
 import { PaginatedResponseDto } from "src/common/dto/paginated-response";
 import { Address } from "src/addresses/entities/address.entity";
@@ -25,10 +26,10 @@ export class ClientsService {
       throw new HttpException("CPF already exists", HttpStatus.BAD_REQUEST);
     }
 
-    const address = this.addressesRepository.create(createClientDto.address);
+    const { address: addressDto, ...clientFields } = createClientDto;
     const client = this.clientsRepository.create({
-      ...createClientDto,
-      address,
+      ...clientFields,
+      address: addressDto ? this.addressFromDto(addressDto) : null,
     });
 
     return await this.clientsRepository.save(client);
@@ -97,13 +98,15 @@ export class ClientsService {
       throw new HttpException("CPF already exists", HttpStatus.BAD_REQUEST);
     }
 
-    const updatedClient = this.clientsRepository.merge(client, updateClientDto);
-    console.log("address", updateClientDto.address);
-    if (updateClientDto.address) {
-      updatedClient.address = this.addressesRepository.merge(
-        client.address,
-        updateClientDto.address,
-      );
+    const { address: addressDto, ...clientPatch } = updateClientDto;
+    const updatedClient = this.clientsRepository.merge(client, clientPatch);
+    if (addressDto != null) {
+      const partial = this.addressPartialFromDto(addressDto);
+      if (client.address) {
+        updatedClient.address = this.addressesRepository.merge(client.address, partial);
+      } else {
+        updatedClient.address = this.addressesRepository.create(partial);
+      }
     }
     return await this.clientsRepository.save(updatedClient);
   }
@@ -120,5 +123,21 @@ export class ClientsService {
       message: "Client removed successfully",
       id,
     };
+  }
+
+  private addressPartialFromDto(dto: CreateAddressDto): DeepPartial<Address> {
+    return {
+      zipcode: dto.zipcode,
+      streetName: dto.streetName,
+      number: dto.number,
+      district: dto.district ?? null,
+      city: dto.city,
+      state: dto.state,
+      additionalDetails: dto.addressAdditionalDetails ?? null,
+    };
+  }
+
+  private addressFromDto(dto: CreateAddressDto): Address {
+    return this.addressesRepository.create(this.addressPartialFromDto(dto));
   }
 }

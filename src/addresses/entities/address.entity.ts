@@ -19,8 +19,8 @@ export class Address {
   @Column({ type: "varchar", length: 255 })
   streetName: string;
 
-  @Column({ type: "varchar", length: 255 })
-  district: string;
+  @Column({ type: "varchar", length: 255, nullable: true })
+  district: string | null;
 
   @Column({ type: "varchar", length: 255 })
   city: string;
@@ -37,7 +37,7 @@ export class Address {
     length: 255,
     nullable: true,
   })
-  additionalDetails: string;
+  additionalDetails: string | null;
 
   @CreateDateColumn({ name: "created_at", type: "timestamptz" })
   createdAt: Date;

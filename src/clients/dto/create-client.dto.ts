@@ -58,7 +58,8 @@ export class CreateClientDto {
   @MaxLength(255)
   mobilePhone: string;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => CreateAddressDto)
-  address: CreateAddressDto;
+  address?: CreateAddressDto;
 }

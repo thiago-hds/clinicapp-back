@@ -68,9 +68,10 @@ export class Client {
 
   @OneToOne(() => Address, {
     cascade: true,
+    nullable: true,
   })
   @JoinColumn({ name: "address_id" })
-  address: Address;
+  address: Address | null;
 
   @Column({
     name: "how_they_found_us",
